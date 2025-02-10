@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Food {
+  food_id        Int          @id @default(autoincrement())
+  name           String       @db.VarChar(255)
+  slug           String?
+  price          Decimal      @db.Decimal(10, 2)
+  description    String?
+  is_available   Boolean?     @default(true)
+  store_id       Int?
+  promotion_id   Int?
+  tags           String?
+  stock_quantity Int?         @default(0)
+  is_removed     Boolean?     @default(false)
+  created_at     DateTime?    @default(now()) @db.Timestamp(6)
+  updated_at     DateTime?    @default(now()) @db.Timestamp(6)
+  Store          Store?       @relation(fields: [store_id], references: [store_id], onDelete: Cascade, onUpdate: NoAction)
+  FoodImage      FoodImage[]
+  FoodOption     FoodOption[]
+}
+
+model FoodImage {
+  image_id    Int       @id @default(autoincrement())
+  food_id     Int?
+  image_url   String
+  is_primary  Boolean?  @default(false)
+  description String?   @db.VarChar(255)
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+  Food        Food?     @relation(fields: [food_id], references: [food_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model FoodOption {
+  option_id        Int                @id @default(autoincrement())
+  food_id          Int?
+  name             String             @db.VarChar(255)
+  description      String?            @db.VarChar(255)
+  price            Decimal?           @db.Decimal(10, 2)
+  created_at       DateTime?          @default(now()) @db.Timestamp(6)
+  updated_at       DateTime?          @default(now()) @db.Timestamp(6)
+  Food             Food?              @relation(fields: [food_id], references: [food_id], onDelete: Cascade, onUpdate: NoAction)
+  FoodOptionChoice FoodOptionChoice[]
+}
+
+model FoodOptionChoice {
+  choice_id  Int         @id @default(autoincrement())
+  option_id  Int?
+  name       String      @db.VarChar(255)
+  price      Int?
+  created_at DateTime?   @default(now()) @db.Timestamp(6)
+  updated_at DateTime?   @default(now()) @db.Timestamp(6)
+  FoodOption FoodOption? @relation(fields: [option_id], references: [option_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model Promotion {
+  promotion_id Int       @id @default(autoincrement())
+  description  String?   @db.VarChar(255)
+  discount     Int
+  start_at     DateTime? @db.Timestamp(6)
+  end_at       DateTime? @db.Timestamp(6)
+  is_removed   Boolean?  @default(false)
+  created_at   DateTime? @default(now()) @db.Timestamp(6)
+  updated_at   DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model Store {
+  store_id      Int       @id @default(autoincrement())
+  store_name    String    @db.VarChar(255)
+  description   String?
+  address       String
+  images        String?
+  phone         String    @db.VarChar(15)
+  email         String?   @unique @db.VarChar(255)
+  website       String?   @db.VarChar(255)
+  opening_hours String?   @db.VarChar(50)
+  closing_hours String?   @db.VarChar(50)
+  rating        Decimal?  @db.Decimal(3, 2)
+  is_removed    Boolean?  @default(false)
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @default(now()) @db.Timestamp(6)
+  Food          Food[]
+}
